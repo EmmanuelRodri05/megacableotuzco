@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TipoPaquete {
+  CABLE_ESTANDAR
+  CABLE_FULL_HD
+  INTERNET
+  DUO
+}
+
+model Paquete {
+  id              String      @id @default(cuid())
+  nombre          String
+  tipo            TipoPaquete
+  descripcion     String
+  precio          Float
+  velocidad       String?
+  caracteristicas String[]
+  activo          Boolean     @default(true)
+  oferta          Oferta?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Oferta {
+  id              String    @id @default(cuid())
+  paqueteId       String    @unique
+  paquete         Paquete   @relation(fields: [paqueteId], references: [id], onDelete: Cascade)
+  descuento       Float
+  precioOferta    Float
+  descripcion     String
+  fechaFin        DateTime?
+  velocidadPromo  String?
+  duracionMeses   Int?
+  activo          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Contacto {
+  id               String   @id @default(cuid())
+  nombre           String
+  email            String
+  telefono         String?
+  servicioInteres  String?
+  mensaje          String
+  leido            Boolean  @default(false)
+  createdAt        DateTime @default(now())
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  createdAt DateTime @default(now())
+}
