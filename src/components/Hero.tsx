@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { Wifi, Tv, ArrowDown, Headphones, MapPin } from "lucide-react"
-import { motion, type Variants } from "framer-motion"
+import { motion, type Variants, type Transition } from "framer-motion"
 
 const FLOATING_DOTS = [
   { left: "8%",  top: "30%", delay: 0 },
@@ -15,9 +15,10 @@ const FLOATING_DOTS = [
   { left: "92%", top: "70%", delay: 0.2 },
 ]
 
+const itemTransition: Transition = { duration: 0.55, ease: "easeOut" }
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 22 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: itemTransition },
 }
 
 const containerVariants: Variants = {
