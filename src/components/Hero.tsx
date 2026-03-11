@@ -15,7 +15,7 @@ const FLOATING_DOTS = [
   { left: "92%", top: "70%", delay: 0.2 },
 ]
 
-const itemTransition: Transition = { duration: 0.55, ease: "easeOut" }
+const itemTransition: Transition = { duration: 0.55, ease: [0, 0, 0.58, 1] }
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 22 },
   visible: { opacity: 1, y: 0, transition: itemTransition },
