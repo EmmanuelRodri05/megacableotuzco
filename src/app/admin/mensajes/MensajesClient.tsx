@@ -3,6 +3,9 @@
 import { useState, useMemo } from "react"
 import { Mail, Phone, CheckCheck, Trash2, Eye, Search } from "lucide-react"
 import toast from "react-hot-toast"
+import { motion, AnimatePresence } from "framer-motion"
+import { fadeInUp, staggerContainerFast } from "@/lib/animations"
+import ConfirmDialog from "@/components/admin/ConfirmDialog"
 
 type Mensaje = {
   id: string
@@ -28,6 +31,7 @@ export default function MensajesClient({ mensajes: inicial }: { mensajes: Mensaj
   const [selected, setSelected] = useState<Mensaje | null>(null)
   const [search, setSearch] = useState("")
   const [filtro, setFiltro] = useState<"TODOS" | "NO_LEIDOS" | "LEIDOS">("TODOS")
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const filtrados = useMemo(() => {
     return mensajes.filter((m) => {
@@ -45,18 +49,28 @@ export default function MensajesClient({ mensajes: inicial }: { mensajes: Mensaj
   }, [mensajes, search, filtro])
 
   const marcarLeido = async (id: string) => {
-    await fetch(`/api/contacto/${id}`, { method: "PATCH" })
-    setMensajes((prev) => prev.map((m) => (m.id === id ? { ...m, leido: true } : m)))
-    if (selected?.id === id) setSelected((prev) => prev ? { ...prev, leido: true } : null)
-    toast.success("Marcado como leido")
+    const res = await fetch(`/api/contacto/${id}`, { method: "PATCH" })
+    if (res.ok) {
+      setMensajes((prev) => prev.map((m) => (m.id === id ? { ...m, leido: true } : m)))
+      if (selected?.id === id) setSelected((prev) => prev ? { ...prev, leido: true } : null)
+      toast.success("Marcado como leído")
+    } else {
+      toast.error("Error al marcar como leído")
+    }
   }
 
   const eliminar = async (id: string) => {
-    if (!confirm("¿Eliminar este mensaje?")) return
-    await fetch(`/api/contacto/${id}`, { method: "DELETE" })
+    const anterior = mensajes
     setMensajes((prev) => prev.filter((m) => m.id !== id))
     if (selected?.id === id) setSelected(null)
-    toast.success("Mensaje eliminado")
+
+    const res = await fetch(`/api/contacto/${id}`, { method: "DELETE" })
+    if (res.ok) {
+      toast.success("Mensaje eliminado")
+    } else {
+      setMensajes(anterior)
+      toast.error("Error al eliminar el mensaje")
+    }
   }
 
   const abrirMensaje = (m: Mensaje) => {
@@ -69,7 +83,12 @@ export default function MensajesClient({ mensajes: inicial }: { mensajes: Mensaj
   return (
     <div className="mt-6">
       {/* Search + Filters */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <motion.div
+        className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+      >
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
@@ -81,17 +100,27 @@ export default function MensajesClient({ mensajes: inicial }: { mensajes: Mensaj
         </div>
         <div className="flex gap-2">
           {(["TODOS", "NO_LEIDOS", "LEIDOS"] as const).map((f) => (
-            <button key={f} onClick={() => setFiltro(f)}
+            <button
+              key={f}
+              onClick={() => setFiltro(f)}
               className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
-                filtro === f ? "bg-red-600 text-white" : "bg-slate-800 text-slate-400 border border-slate-700 hover:text-white"
-              }`}>
-              {f === "TODOS" ? `Todos (${mensajes.length})` : f === "NO_LEIDOS" ? `Sin leer (${noLeidos})` : `Leídos (${mensajes.length - noLeidos})`}
+                filtro === f
+                  ? "bg-red-600 text-white"
+                  : "bg-slate-800 text-slate-400 border border-slate-700 hover:text-white"
+              }`}
+            >
+              {f === "TODOS"
+                ? `Todos (${mensajes.length})`
+                : f === "NO_LEIDOS"
+                ? `Sin leer (${noLeidos})`
+                : `Leídos (${mensajes.length - noLeidos})`}
             </button>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Message list */}
         <div className="rounded-2xl bg-slate-800 border border-slate-700 overflow-hidden">
           {filtrados.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
@@ -99,15 +128,33 @@ export default function MensajesClient({ mensajes: inicial }: { mensajes: Mensaj
               <p>{search ? "Sin resultados para tu búsqueda" : "No hay mensajes"}</p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-700">
+            <motion.div
+              className="divide-y divide-slate-700"
+              variants={staggerContainerFast}
+              initial="hidden"
+              animate="visible"
+              key={filtro + search}
+            >
               {filtrados.map((m) => (
-                <div key={m.id} onClick={() => abrirMensaje(m)}
-                  className={`cursor-pointer px-5 py-4 transition-colors ${selected?.id === m.id ? "bg-blue-900/30" : "hover:bg-slate-700/40"}`}>
+                <motion.div
+                  key={m.id}
+                  variants={fadeInUp}
+                  onClick={() => abrirMensaje(m)}
+                  className={`cursor-pointer px-5 py-4 transition-colors ${
+                    selected?.id === m.id ? "bg-blue-900/30" : "hover:bg-slate-700/40"
+                  }`}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         {!m.leido && <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0" />}
-                        <p className={`text-sm truncate ${!m.leido ? "font-bold text-white" : "font-medium text-slate-400"}`}>{m.nombre}</p>
+                        <p
+                          className={`text-sm truncate ${
+                            !m.leido ? "font-bold text-white" : "font-medium text-slate-400"
+                          }`}
+                        >
+                          {m.nombre}
+                        </p>
                         {m.servicioInteres && (
                           <span className="hidden sm:inline-block rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-400">
                             {SERVICIO_LABELS[m.servicioInteres] ?? m.servicioInteres}
@@ -119,91 +166,144 @@ export default function MensajesClient({ mensajes: inicial }: { mensajes: Mensaj
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <p className="text-xs text-slate-500">
-                        {new Date(m.createdAt).toLocaleDateString("es-PE", { day: "numeric", month: "short" })}
+                        {new Date(m.createdAt).toLocaleDateString("es-PE", {
+                          day: "numeric",
+                          month: "short",
+                        })}
                       </p>
                       <div className="flex gap-1">
                         {!m.leido && (
-                          <button onClick={(e) => { e.stopPropagation(); marcarLeido(m.id) }}
-                            className="rounded p-1 text-slate-500 hover:text-blue-400 hover:bg-blue-900/30 transition-colors">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); marcarLeido(m.id) }}
+                            className="rounded p-1 text-slate-500 hover:text-blue-400 hover:bg-blue-900/30 transition-colors"
+                            title="Marcar como leído"
+                          >
                             <CheckCheck className="h-3.5 w-3.5" />
                           </button>
                         )}
-                        <button onClick={(e) => { e.stopPropagation(); eliminar(m.id) }}
-                          className="rounded p-1 text-slate-500 hover:text-red-400 hover:bg-red-900/30 transition-colors">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setConfirmDelete(m.id) }}
+                          className="rounded p-1 text-slate-500 hover:text-red-400 hover:bg-red-900/30 transition-colors"
+                          title="Eliminar"
+                        >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
 
+        {/* Detail panel */}
         <div className="rounded-2xl bg-slate-800 border border-slate-700">
-          {selected ? (
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-5">
-                <div>
-                  <h3 className="text-lg font-bold text-white">{selected.nombre}</h3>
-                  <p className="text-sm text-slate-400">
-                    {new Date(selected.createdAt).toLocaleDateString("es-PE", {
-                      weekday: "long", day: "numeric", month: "long", year: "numeric",
-                    })}
+          <AnimatePresence mode="wait">
+            {selected ? (
+              <motion.div
+                key={selected.id}
+                className="p-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+              >
+                <div className="flex items-start justify-between mb-5">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">{selected.nombre}</h3>
+                    <p className="text-sm text-slate-400">
+                      {new Date(selected.createdAt).toLocaleDateString("es-PE", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selected.servicioInteres && (
+                      <span className="rounded-full bg-blue-900/40 px-2.5 py-1 text-xs font-medium text-blue-400">
+                        {SERVICIO_LABELS[selected.servicioInteres] ?? selected.servicioInteres}
+                      </span>
+                    )}
+                    {selected.leido && (
+                      <span className="flex items-center gap-1 rounded-full bg-green-900/40 px-3 py-1 text-xs font-medium text-green-400">
+                        <CheckCheck className="h-3 w-3" /> Leído
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 mb-5">
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <Mail className="h-4 w-4 text-slate-500" />
+                    <a href={`mailto:${selected.email}`} className="text-cyan-400 hover:underline">
+                      {selected.email}
+                    </a>
+                  </div>
+                  {selected.telefono && (
+                    <div className="flex items-center gap-2 text-sm text-slate-300">
+                      <Phone className="h-4 w-4 text-slate-500" />
+                      <a href={`tel:${selected.telefono}`} className="text-cyan-400 hover:underline">
+                        {selected.telefono}
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-xl bg-slate-700/50 p-4">
+                  <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
+                    {selected.mensaje}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  {selected.servicioInteres && (
-                    <span className="rounded-full bg-blue-900/40 px-2.5 py-1 text-xs font-medium text-blue-400">
-                      {SERVICIO_LABELS[selected.servicioInteres] ?? selected.servicioInteres}
-                    </span>
-                  )}
-                  {selected.leido && (
-                    <span className="flex items-center gap-1 rounded-full bg-green-900/40 px-3 py-1 text-xs font-medium text-green-400">
-                      <CheckCheck className="h-3 w-3" /> Leído
-                    </span>
-                  )}
+
+                <div className="mt-5 flex gap-3">
+                  <a
+                    href={`mailto:${selected.email}`}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Responder por email
+                  </a>
+                  <button
+                    onClick={() => setConfirmDelete(selected.id)}
+                    className="flex items-center gap-2 rounded-xl border border-red-800 px-4 py-2.5 text-sm font-semibold text-red-400 hover:bg-red-900/30 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-3 mb-5">
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <Mail className="h-4 w-4 text-slate-500" />
-                  <a href={`mailto:${selected.email}`} className="text-cyan-400 hover:underline">{selected.email}</a>
-                </div>
-                {selected.telefono && (
-                  <div className="flex items-center gap-2 text-sm text-slate-300">
-                    <Phone className="h-4 w-4 text-slate-500" />
-                    <a href={`tel:${selected.telefono}`} className="text-cyan-400 hover:underline">{selected.telefono}</a>
-                  </div>
-                )}
-              </div>
-
-              <div className="rounded-xl bg-slate-700/50 p-4">
-                <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">{selected.mensaje}</p>
-              </div>
-
-              <div className="mt-5 flex gap-3">
-                <a href={`mailto:${selected.email}`}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
-                  <Mail className="h-4 w-4" />
-                  Responder por email
-                </a>
-                <button onClick={() => eliminar(selected.id)}
-                  className="flex items-center gap-2 rounded-xl border border-red-800 px-4 py-2.5 text-sm font-semibold text-red-400 hover:bg-red-900/30 transition-colors">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-              <Eye className="h-12 w-12 mb-3 opacity-30" />
-              <p className="text-sm">Selecciona un mensaje para verlo</p>
-            </div>
-          )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="empty"
+                className="flex flex-col items-center justify-center py-20 text-slate-500"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Eye className="h-12 w-12 mb-3 opacity-30" />
+                <p className="text-sm">Selecciona un mensaje para verlo</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        title="Eliminar mensaje"
+        message="¿Estás seguro de que quieres eliminar este mensaje? Esta acción no se puede deshacer."
+        variant="danger"
+        confirmLabel="Eliminar"
+        onConfirm={() => {
+          if (confirmDelete) eliminar(confirmDelete)
+          setConfirmDelete(null)
+        }}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   )
 }

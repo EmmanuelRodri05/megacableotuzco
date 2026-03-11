@@ -27,7 +27,7 @@ export default function LoginPage() {
     })
 
     if (result?.ok) {
-      toast.success("Bienvenido al panel de administracion")
+      toast.success("Bienvenido al panel de administración")
       router.push("/admin/dashboard")
       router.refresh()
     } else {
@@ -77,7 +77,7 @@ export default function LoginPage() {
             />
           </motion.div>
           <motion.h1 variants={fadeInUp} className="mt-4 text-xl font-bold text-white">
-            Panel de Administracion
+            Panel de Administración
           </motion.h1>
           <motion.p variants={fadeInUp} className="mt-1 text-sm text-slate-400">
             Ingresa tus credenciales para continuar
@@ -140,7 +140,7 @@ export default function LoginPage() {
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {loading ? "Iniciando sesion..." : "Iniciar sesion"}
+                {loading ? "Iniciando sesión..." : "Iniciar sesión"}
               </motion.button>
             </motion.div>
           </motion.form>

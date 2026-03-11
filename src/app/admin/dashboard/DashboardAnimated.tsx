@@ -18,6 +18,8 @@ type Mensaje = {
   id: string
   nombre: string
   email: string
+  telefono: string | null
+  servicioInteres: string | null
   mensaje: string
   leido: boolean
   createdAt: string
@@ -28,7 +30,6 @@ const ICONS = { Package, Tag, MessageSquare, TrendingUp }
 /* Contador animado de 0 → value */
 function AnimatedCounter({ value }: { value: number }) {
   const [display, setDisplay] = useState(0)
-  const ref = useRef<HTMLSpanElement>(null)
   const started = useRef(false)
 
   useEffect(() => {
@@ -45,7 +46,7 @@ function AnimatedCounter({ value }: { value: number }) {
     requestAnimationFrame(tick)
   }, [value])
 
-  return <span ref={ref}>{display}</span>
+  return <span>{display}</span>
 }
 
 export default function DashboardAnimated({ stats, mensajesRecientes }: { stats: Stat[]; mensajesRecientes: Mensaje[] }) {

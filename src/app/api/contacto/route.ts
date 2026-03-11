@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/../auth"
 import { z } from "zod"
 
 const schema = z.object({
@@ -10,12 +11,9 @@ const schema = z.object({
   mensaje: z.string().min(10),
 })
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const adminKey = searchParams.get("key")
-  if (adminKey !== process.env.AUTH_SECRET) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-  }
+export async function GET() {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
 
   try {
     const contactos = await prisma.contacto.findMany({

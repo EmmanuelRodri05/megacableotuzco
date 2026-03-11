@@ -1,31 +1,14 @@
 @import "tailwindcss";
 
-:root {
-  --primary: #0056b3;
-  --primary-dark: #003d80;
-  --accent: #ff6b00;
-  --background: #f8fafc;
-  --foreground: #0f172a;
-}
-
-* {
+html {
   scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 .gradient-hero {
   background: linear-gradient(135deg, #0a0a1a 0%, #0d1b2a 40%, #0a2540 70%, #0d3b55 100%);
-}
-
-.card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 86, 179, 0.15);
 }

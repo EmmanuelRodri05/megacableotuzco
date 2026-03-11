@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import Navbar from "@/components/Navbar"
 import Hero from "@/components/Hero"
+import PorQueNosotros from "@/components/PorQueNosotros"
 import PaquetesSection from "@/components/PaquetesSection"
+import ComoContratar from "@/components/ComoContratar"
 import OfertasSection from "@/components/OfertasSection"
 import ContactoSection from "@/components/ContactoSection"
 import WhatsAppButton from "@/components/WhatsAppButton"
@@ -15,7 +17,7 @@ async function getPaquetes() {
     include: {
       oferta: {
         where: { activo: true },
-        select: { descuento: true, precioOferta: true, descripcion: true },
+        select: { descuento: true, precioOferta: true, descripcion: true, velocidadPromo: true },
       },
     },
     orderBy: { precio: "asc" },
@@ -40,22 +42,17 @@ async function getOfertas() {
 export default async function Home() {
   const [paquetes, ofertas] = await Promise.all([getPaquetes(), getOfertas()])
 
-  const paquetesData = paquetes.map((p) => ({
-    ...p,
-    oferta: p.oferta ?? null,
-  }))
-
-  const ofertasData = ofertas.map((o) => ({
-    ...o,
-    fechaFin: o.fechaFin ? o.fechaFin.toISOString() : null,
-  }))
+  const paquetesData = paquetes.map((p) => ({ ...p, oferta: p.oferta ?? null }))
+  const ofertasData  = ofertas.map((o) => ({ ...o, fechaFin: o.fechaFin ? o.fechaFin.toISOString() : null }))
 
   return (
     <>
       <Navbar />
       <main>
         <Hero />
+        <PorQueNosotros />
         <PaquetesSection paquetes={paquetesData} />
+        <ComoContratar />
         <OfertasSection ofertas={ofertasData} />
         <ContactoSection />
       </main>

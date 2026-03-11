@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { paqueteId, descuento, precioOferta, descripcion, fechaFin, velocidadPromo, duracionMeses } = body
 
-    if (!paqueteId || descuento === undefined || !precioOferta || !descripcion) {
+    if (!paqueteId || descuento === undefined || precioOferta === undefined || precioOferta === null || !descripcion) {
       return NextResponse.json({ error: "Campos requeridos incompletos" }, { status: 400 })
     }
 

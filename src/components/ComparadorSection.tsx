@@ -2,8 +2,7 @@
 
 import { Check, X, Wifi, Tv, Star, Package } from "lucide-react"
 import AnimatedSection from "./AnimatedSection"
-
-const WHATSAPP = "51930854814"
+import { WHATSAPP_NUMBER } from "@/lib/constants"
 
 type TipoPaquete = "CABLE_ESTANDAR" | "CABLE_FULL_HD" | "INTERNET" | "DUO"
 
@@ -37,14 +36,14 @@ const FEATURE_ROWS = [
 function hasFeature(paquete: PaqueteComparador, feature: string): boolean {
   const combined = [
     ...paquete.caracteristicas,
-    paquete.tipo === "DUO" ? "television hd" : "",
     paquete.tipo === "DUO" || paquete.tipo === "INTERNET" ? "internet incluido" : "",
-    paquete.tipo === "CABLE_FULL_HD" || paquete.tipo === "CABLE_ESTANDAR" ? "television hd" : "",
   ].join(" ").toLowerCase()
-  return combined.includes(feature.toLowerCase().replace("é", "e").replace("á", "a").replace("ó", "o").replace("ú", "u"))
+  const featureNorm = feature.toLowerCase()
+    .replace(/é/g, "e").replace(/á/g, "a").replace(/ó/g, "o").replace(/ú/g, "u").replace(/í/g, "i")
+  return combined.includes(featureNorm)
     || (feature === "Television HD" && (paquete.tipo === "CABLE_FULL_HD" || paquete.tipo === "DUO"))
     || (feature === "Internet incluido" && (paquete.tipo === "INTERNET" || paquete.tipo === "DUO"))
-    || (feature === "instalacion gratuita" && true)
+    || feature === "Instalación gratuita"
 }
 
 export default function ComparadorSection({ paquetes }: { paquetes: PaqueteComparador[] }) {
@@ -149,7 +148,7 @@ export default function ComparadorSection({ paquetes }: { paquetes: PaqueteCompa
                     return (
                       <td key={p.id} className="px-6 py-5 text-center">
                         <a
-                          href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Hola, estoy interesado en el paquete *${p.nombre}* a *S/ ${(p.oferta ? p.oferta.precioOferta : p.precio).toFixed(2)}/mes*. ¿Me pueden dar más información?`)}`}
+                          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, estoy interesado en el paquete *${p.nombre}* a *S/ ${(p.oferta ? p.oferta.precioOferta : p.precio).toFixed(2)}/mes*. ¿Me pueden dar más información?`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-block rounded-full bg-green-600 px-5 py-2 text-xs font-bold text-white hover:bg-green-700 transition-colors">

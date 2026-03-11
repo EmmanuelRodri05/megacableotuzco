@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Wifi, Tv, ArrowDown } from "lucide-react"
+import { Wifi, Tv, ArrowDown, Headphones, MapPin } from "lucide-react"
 import { motion } from "framer-motion"
 
 const FLOATING_DOTS = [
@@ -154,10 +154,10 @@ export default function Hero() {
               className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4"
             >
               {[
-                { icon: Wifi, label: "Alta velocidad", value: "Hasta 1 Gbps" },
-                { icon: Tv,   label: "Canales HD",     value: "+80 canales" },
-                { icon: Wifi, label: "Soporte",         value: "24/7" },
-                { icon: Tv,   label: "Cobertura",       value: "Toda la ciudad" },
+                { icon: Wifi,       label: "Alta velocidad", value: "Hasta 1 Gbps"   },
+                { icon: Tv,         label: "Canales HD",     value: "+80 canales"    },
+                { icon: Headphones, label: "Soporte",         value: "24/7"           },
+                { icon: MapPin,     label: "Cobertura",       value: "Toda la ciudad" },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
