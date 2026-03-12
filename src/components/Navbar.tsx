@@ -120,7 +120,13 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   variants={{ hidden: { opacity: 0, x: -12 }, visible: { opacity: 1, x: 0 } }}
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setIsOpen(false)
+                    setTimeout(() => {
+                      document.getElementById(link.section)?.scrollIntoView({ behavior: "smooth" })
+                    }, 280)
+                  }}
                   className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     active === link.section
                       ? "bg-cyan-400/10 text-cyan-400"
@@ -133,7 +139,13 @@ export default function Navbar() {
               <motion.a
                 href="#contacto"
                 variants={{ hidden: { opacity: 0, x: -12 }, visible: { opacity: 1, x: 0 } }}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setIsOpen(false)
+                  setTimeout(() => {
+                    document.getElementById("contacto")?.scrollIntoView({ behavior: "smooth" })
+                  }, 280)
+                }}
                 className="mt-2 rounded-full bg-red-600 px-5 py-2.5 text-center text-sm font-semibold text-white"
               >
                 Contratar ahora
