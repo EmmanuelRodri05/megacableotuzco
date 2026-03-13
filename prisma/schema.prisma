@@ -23,6 +23,7 @@ model Paquete {
   velocidad       String?
   caracteristicas String[]
   activo          Boolean     @default(true)
+  recomendado     Boolean     @default(false)
   oferta          Oferta?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt

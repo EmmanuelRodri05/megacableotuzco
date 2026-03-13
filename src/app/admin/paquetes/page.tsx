@@ -18,6 +18,7 @@ type Paquete = {
   velocidad: string | null
   caracteristicas: string[]
   activo: boolean
+  recomendado: boolean
   oferta: { id: string } | null
 }
 
@@ -43,6 +44,7 @@ const emptyForm = {
   velocidad: "",
   caracteristicas: "",
   activo: true,
+  recomendado: false,
 }
 
 type DialogState = {
@@ -92,6 +94,7 @@ export default function PaquetesAdminPage() {
       velocidad: p.velocidad || "",
       caracteristicas: p.caracteristicas.join("\n"),
       activo: p.activo,
+      recomendado: !!p.recomendado,
     })
     setShowModal(true)
   }
@@ -110,6 +113,7 @@ export default function PaquetesAdminPage() {
       velocidad: form.velocidad || null,
       caracteristicas: form.caracteristicas.split("\n").filter((c) => c.trim()),
       activo: form.activo,
+      recomendado: form.recomendado,
     }
     const url = editId ? `/api/paquetes/${editId}` : "/api/paquetes"
     const method = editId ? "PUT" : "POST"
@@ -179,6 +183,15 @@ export default function PaquetesAdminPage() {
     })
   }
 
+  const toggleRecomendado = async (p: Paquete) => {
+    const res = await fetch(`/api/paquetes/${p.id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recomendado: !p.recomendado }),
+    })
+    if (res.ok) { toast.success(p.recomendado ? 'Recomendación quitada' : 'Marcado como recomendado'); fetchPaquetes() }
+    else toast.error('Error al actualizar')
+  }
+
   return (
     <div>
       <motion.div
@@ -219,6 +232,7 @@ export default function PaquetesAdminPage() {
                 <th className="px-6 py-3">Precio</th>
                 <th className="px-6 py-3 hidden sm:table-cell">Estado</th>
                 <th className="px-6 py-3 hidden sm:table-cell">Oferta</th>
+                <th className="px-6 py-3 hidden sm:table-cell text-center">Destacado</th>
                 <th className="px-6 py-3 text-right">Acciones</th>
               </tr>
             </thead>
@@ -242,7 +256,7 @@ export default function PaquetesAdminPage() {
                           <Icon className="h-4 w-4 text-blue-400" />
                         </div>
                         <div>
-                          <p className="font-semibold text-white">{p.nombre}</p>
+                          <div className="flex items-center gap-1.5"><p className="font-semibold text-white">{p.nombre}</p>{p.recomendado && <span className="rounded-full bg-orange-900/40 px-1.5 py-0.5 text-xs font-bold text-orange-400">★</span>}</div>
                           {p.velocidad && <p className="text-xs text-slate-400">{p.velocidad}</p>}
                         </div>
                       </div>
@@ -268,6 +282,12 @@ export default function PaquetesAdminPage() {
                       ) : (
                         <span className="text-xs text-slate-500">Sin oferta</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4 hidden sm:table-cell text-center">
+                      <button onClick={() => toggleRecomendado(p)} title={p.recomendado ? 'Quitar recomendación' : 'Marcar como recomendado'}
+                        className={`rounded-lg p-1.5 transition-colors ${p.recomendado ? 'text-orange-400 bg-orange-900/30 hover:bg-orange-900/50' : 'text-slate-500 hover:text-orange-400 hover:bg-orange-900/20'}`}>
+                        <Star className={`h-4 w-4 ${p.recomendado ? 'fill-orange-400' : ''}`} />
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
@@ -390,15 +410,14 @@ export default function PaquetesAdminPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="activo"
-                    checked={form.activo}
-                    onChange={(e) => setForm({ ...form, activo: e.target.checked })}
-                    className="h-4 w-4 rounded"
-                  />
-                  <label htmlFor="activo" className="text-sm font-medium text-slate-300">
-                    Paquete activo (visible al público)
+                  <input type="checkbox" id="activo" checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} className="h-4 w-4 rounded" />
+                  <label htmlFor="activo" className="text-sm font-medium text-slate-300">Paquete activo (visible al público)</label>
+                </div>
+                <div className="flex items-start gap-2">
+                  <input type="checkbox" id="recomendado" checked={!!form.recomendado} onChange={(e) => setForm({ ...form, recomendado: e.target.checked })} className="mt-0.5 h-4 w-4 rounded accent-orange-500" />
+                  <label htmlFor="recomendado" className="cursor-pointer">
+                    <span className="text-sm font-medium text-slate-300">⭐ Marcar como Plan Recomendado</span>
+                    <p className="text-xs text-slate-500">Se muestra con banner naranja en la página pública</p>
                   </label>
                 </div>
 

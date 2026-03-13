@@ -9,7 +9,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   try {
     const { id } = await params
     const body = await req.json()
-    const { nombre, tipo, descripcion, precio, velocidad, caracteristicas, activo } = body
+    const { nombre, tipo, descripcion, precio, velocidad, caracteristicas, activo, recomendado } = body
 
     const paquete = await prisma.paquete.update({
       where: { id },
@@ -21,6 +21,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         ...(velocidad !== undefined && { velocidad }),
         ...(caracteristicas && { caracteristicas }),
         ...(activo !== undefined && { activo }),
+        ...(recomendado !== undefined && { recomendado }),
       },
     })
 

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import Navbar from "@/components/Navbar"
 import Hero from "@/components/Hero"
+import StatsSection from "@/components/StatsSection"
 import PorQueNosotros from "@/components/PorQueNosotros"
 import PaquetesSection from "@/components/PaquetesSection"
 import ComoContratar from "@/components/ComoContratar"
@@ -50,6 +51,7 @@ export default async function Home() {
       <Navbar />
       <main>
         <Hero />
+        <StatsSection />
         <PorQueNosotros />
         <PaquetesSection paquetes={paquetesData} />
         <ComoContratar />

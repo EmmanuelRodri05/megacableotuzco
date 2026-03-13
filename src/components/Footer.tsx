@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { fadeInUp, staggerContainer, inViewProps } from "@/lib/animations"
 import { PHONE_DISPLAY, EMAIL, ADDRESS, HOURS, SOCIAL } from "@/lib/constants"
 import { Icon } from "@iconify/react"
+import LibroReclamaciones from "@/components/LibroReclamaciones"
 
 export default function Footer() {
   return (
@@ -101,6 +102,7 @@ export default function Footer() {
               <ul className="flex flex-col gap-1.5 text-sm">
                 <li><a href="/terminos" className="hover:text-white transition-colors">Términos y condiciones</a></li>
                 <li><a href="/privacidad" className="hover:text-white transition-colors">Política de privacidad</a></li>
+                <li><LibroReclamaciones /></li>
               </ul>
             </div>
           </motion.div>

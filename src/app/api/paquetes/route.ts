@@ -26,8 +26,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Campos requeridos incompletos" }, { status: 400 })
     }
 
+    const { recomendado } = body
     const paquete = await prisma.paquete.create({
-      data: { nombre, tipo, descripcion, precio: Number(precio), velocidad: velocidad || null, caracteristicas: caracteristicas || [] },
+      data: { nombre, tipo, descripcion, precio: Number(precio), velocidad: velocidad || null, caracteristicas: caracteristicas || [], recomendado: !!recomendado },
     })
 
     return NextResponse.json(paquete, { status: 201 })
